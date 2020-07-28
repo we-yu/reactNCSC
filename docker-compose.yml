@@ -1,0 +1,16 @@
+version: '3'
+services:
+  web:
+    container_name: nodeNCSC
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/usr/src/app
+    working_dir: /usr/src/app
+    command: sh -c "cd react-sample && yarn start"
+    #    command: sh -c "npm install -g create-react-app && create-react-app react-sample && cd react-sample && yarn start"
+    ports:
+      - "3210:3000"
+    tty: true
+    restart: always
