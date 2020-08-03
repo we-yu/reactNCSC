@@ -6,47 +6,82 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      // [{配列},{配列},{配列},{配列}...]の形で各盤面を保存する。
+      history: [{squaresH: new Array(9).fill(null)}],
       squaresSt: Array(9).fill(null),
       xIsNext: true, // 次の手番
       finished: false // 勝負が決まったか
+      , stepNumber: 0
     };
     this.handleClick = this.handleClick.bind(this);
   }
 
   handleClick(i) {
-    const squaresAry = [...this.state.squaresSt];
-    if(squaresAry[i]) {return;}
+    // const history = [...this.state.history];
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const squaresH = [...history[history.length - 1].squaresH];
+
+    if(squaresH[i]) {return;}
 
     // Check is there winner
     if(this.state.finished) {return;}
-    const winner = calculateWinner(this.state.squaresSt);
+    const winner = calculateWinner(squaresH);
     if(winner){
       this.setState({finished: true});
       return;
     }
 
-    squaresAry[i] = this.state.xIsNext ? "X" : "O";
+    squaresH[i] = this.state.xIsNext ? "X" : "O";
     this.setState({
-      squaresSt: squaresAry,
-      xIsNext: !this.state.xIsNext
+      history: [...history, {squaresH}],
+      xIsNext: !this.state.xIsNext,
+      stepNumber: history.length,
     });
   };
 
+  jumpTo(step){
+    console.log(step);
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) === 0,
+      finished: false
+    });
+  }
+
   render() {
-    const winner = calculateWinner(this.state.squaresSt);
+    const history = [...this.state.history];
+    // const squaresH = history[history.length - 1].squaresH; 
+    const squaresH = [...history[this.state.stepNumber].squaresH]; 
+
+    const winner = calculateWinner(squaresH);
     // const status = "Next Player: " + (this.state.xIsNext ? "X" : "O");
     const status = (winner) ?
       "Winner: " + winner :
       "Next Player: " + (this.state.xIsNext ? "X" : "O");
       
+    // History trace button
+    const moves = history.map((step, move) => {
+      // 0 click = 0
+      // 1 click = 0, 1
+      // 2 click = 0, 1, 2 ...
+      // console.log(step, " ::: ", move);
+      const desc = move ? "Go to move #" + move : "Go to game start";
+      return(
+        <li key={move}>
+          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+        </li>
+      );
+    });
+
     return (
       <div className="game">
         <Board
-          squaresBrd={this.state.squaresSt}
+          squaresBrd={squaresH}
           onClick={(i) => this.handleClick(i)}
         />
         <div className="game-info">
           <div>{status}</div>
+          <ol>{moves}</ol>
         </div>
       </div>
     );
