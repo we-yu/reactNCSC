@@ -25,6 +25,13 @@ class App extends React.Component {
 
     // Check is there winner
     if(this.state.finished) {return;}
+
+    // Draw
+    if(this.state.stepNumber >= 9) {
+      this.setState({finished: true});
+      return;
+    }
+
     const winner = calculateWinner(squaresH);
     if(winner){
       this.setState({finished: true});
@@ -48,17 +55,20 @@ class App extends React.Component {
     });
   }
 
+  judgeNextStatus(winner){
+    if (this.state.stepNumber >= 9) return "DRAW";
+    return (winner) ? "Winner: " + winner : "Next Player: " + (this.state.xIsNext ? "X" : "O");
+  }
+
   render() {
     const history = [...this.state.history];
     // const squaresH = history[history.length - 1].squaresH; 
     const squaresH = [...history[this.state.stepNumber].squaresH]; 
 
     const winner = calculateWinner(squaresH);
-    // const status = "Next Player: " + (this.state.xIsNext ? "X" : "O");
-    const status = (winner) ?
-      "Winner: " + winner :
-      "Next Player: " + (this.state.xIsNext ? "X" : "O");
-      
+
+    const status = this.judgeNextStatus(winner);
+    
     // History trace button
     const moves = history.map((step, move) => {
       // 0 click = 0
